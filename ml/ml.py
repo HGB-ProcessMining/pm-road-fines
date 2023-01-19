@@ -49,8 +49,9 @@ def preprocess_data(data, use_scaler=True):
     use_scaler: if True, standar scale numeric features
     return: X, y    
     """
-    numeric_features = ["amount", "points"]
-    categorical_features = ["vehicleClass", "article" ]
+
+    numeric_features = ["amount", "points", "duration", "duration_norm", "totalPaymentAmount", "expense", "paymentAmount"]
+    categorical_features = ["vehicleClass", "article", "dismissal", "concept:name","notificationType", "lastSent", "matricola"]
     timestamp_features = ["time:timestamp"]
     target = "cat_diff"
 
@@ -222,7 +223,7 @@ def get_feature_importance(model, X_train, dataset_index):
 
 def apply(dataset_index):
     data_dir = "./data"
-    data_file = f"X_data/{dataset_index}full_data.csv"
+    data_file = f"X_data/{dataset_index}full_prep_data.csv"
     label_file = "labels/paid.csv"
     test_file = "test_indices/test_indices.csv"
 
@@ -250,16 +251,17 @@ def apply(dataset_index):
     #fit model
     model.fit(X_train, y_train)
 
-    evaluate_models(model, X_train, X_test, y_train, y_test, dataset_index)
+    results = evaluate_models(model, X_train, X_test, y_train, y_test, dataset_index)
     plot_confusion_matrix(model, X_train, X_test, y_train, y_test, dataset_index)
     get_probabilites(model, X_train, X_test,y_train, y_test, dataset_index)
     get_feature_importance(model, X_train, dataset_index)
+    return results
 
 
 if __name__ == "__main__":
     for i in range(0,9):
         print("Applying model to dataset", i, "")
-        apply(i)
+        print(apply(i))
 
 
 
