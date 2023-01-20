@@ -27,7 +27,8 @@ def probs_to_log(log, probs, dataset_index):
         try:
             value = float(probs.loc[index, "PAY"])
             log.loc[index, "probs"][dataset_index] = value
-        except: raise Exception(f"some problems with index {index}")
+        except:continue
+    print(dataset_index, "done")
 
     return log
 
@@ -61,9 +62,10 @@ def apply():
     data_dir = "./data"
     result_dir = "./results"
 
-    probs_to_log_all_models(data_dir, result_dir, [0])
+    probs_to_log_all_models(data_dir, result_dir, [0,1,2,3,4,5,6,7,8])
 
 if __name__ == "__main__":
+    print("START")
     apply()
 
 

@@ -13,6 +13,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.metrics import confusion_matrix
 import seaborn as sns
+from sklearn.model_selection import train_test_split
 
 """important note:
 PAY: 0
@@ -50,7 +51,7 @@ def preprocess_data(data, use_scaler=True):
     return: X, y    
     """
 
-    numeric_features = ["amount", "points", "duration", "duration_norm", "totalPaymentAmount", "expense", "paymentAmount"]
+    numeric_features = ["amount", "points", "duration_norm", "totalPaymentAmount", "expense", "paymentAmount"]
     categorical_features = ["vehicleClass", "article", "dismissal", "concept:name","notificationType", "lastSent", "matricola"]
     timestamp_features = ["time:timestamp"]
     target = "cat_diff"
@@ -85,7 +86,7 @@ def preprocess_data(data, use_scaler=True):
     return X, y
 
 
-def train_test_split(X,y, test_indices):
+def apply_train_test_split(X,y, test_indices, on_test_indices):
     """
     split data into train and test
     X: dataframe with features
@@ -94,12 +95,18 @@ def train_test_split(X,y, test_indices):
     return: X_train, X_test, y_train, y_test
     """
     #split data into train and test by test_indices.csv
-    test_indices = pd.read_csv(test_indices)
-    test_indices = test_indices["case:concept:name"].values
-    X_train = X[~X.index.isin(test_indices)]
-    X_test = X[X.index.isin(test_indices)]
-    y_train = y[~y.index.isin(test_indices)]
-    y_test = y[y.index.isin(test_indices)]
+    if on_test_indices:
+        print("split on test_indices")
+        test_indices = pd.read_csv(test_indices)
+        test_indices = test_indices["case:concept:name"].values
+        X_train = X[~X.index.isin(test_indices)]
+        X_test = X[X.index.isin(test_indices)]
+        y_train = y[~y.index.isin(test_indices)]
+        y_test = y[y.index.isin(test_indices)]
+    else:
+        #apply sklearn train_test_split
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
     return X_train, X_test, y_train, y_test
 
 
@@ -158,18 +165,21 @@ def plot_confusion_matrix(model, X_train, X_test, y_train, y_test, dataset_index
     cm_test = confusion_matrix(y_test, y_pred_test)
 
     df_cm_test = pd.DataFrame(cm_test, index = [i for i in ["PAY", "NOT PAY"]], columns = [i for i in ["PAY", "NOT PAY"]])
+    df_cm_test_rel = df_cm_test.div(df_cm_test.sum(axis=1), axis=0)
 
     cm_train = confusion_matrix(y_train, y_pred_train)
 
     df_cm_train = pd.DataFrame(cm_train, index = [i for i in ["PAY", "NOT PAY"]], columns = [i for i in ["PAY", "NOT PAY"]])
+    df_cm_train_rel = df_cm_train.div(df_cm_train.sum(axis=1), axis=0)
 
     #set labels
     ax[0].set_xlabel("Predicted")
     ax[0].set_ylabel("True")
     ax[1].set_xlabel("Predicted")
     ax[1].set_ylabel("True")
-    sns.heatmap(df_cm_test, annot=True, ax=ax[0], fmt="d", cmap="Blues")
-    sns.heatmap(df_cm_train, annot=True, ax=ax[1], fmt="d", cmap="Blues")
+    #plot df_cm, where colors should be based on relative frequencies
+    sns.heatmap(df_cm_test_rel, annot=True, ax=ax[0],  cmap="Blues")
+    sns.heatmap(df_cm_train_rel, annot=True, ax=ax[1],  cmap="Blues")
     ax[0].set_title("Test Data")
     ax[1].set_title("Train Data")
 
@@ -234,9 +244,9 @@ def apply(dataset_index):
 
     #prepare data
     data = load_data(data_path, label_path)
-    data = calc_label_col(data)
+    data = calc_label_col(data, threshold=2)
     X,y = preprocess_data(data)
-    X_train, X_test, y_train, y_test = train_test_split(X,y, test_path)
+    X_train, X_test, y_train, y_test = apply_train_test_split(X,y, test_path, on_test_indices=True)
 
     #apply random forest
     model = RandomForestClassifier(
