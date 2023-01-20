@@ -161,7 +161,7 @@ def plot_confusion_matrix(model, X_train, X_test, y_train, y_test, dataset_index
     #plot confusion matrix
     y_pred_test = model.predict(X_test)
     y_pred_train = model.predict(X_train)
-    fig, ax = plt.subplots(1,2, figsize=(15,5))
+    fig, ax = plt.subplots(2,1, figsize=(3,6))
     cm_test = confusion_matrix(y_test, y_pred_test)
 
     df_cm_test = pd.DataFrame(cm_test, index = [i for i in ["PAY", "NOT PAY"]], columns = [i for i in ["PAY", "NOT PAY"]])
@@ -178,8 +178,8 @@ def plot_confusion_matrix(model, X_train, X_test, y_train, y_test, dataset_index
     ax[1].set_xlabel("Predicted")
     ax[1].set_ylabel("True")
     #plot df_cm, where colors should be based on relative frequencies
-    sns.heatmap(df_cm_test_rel, annot=True, ax=ax[0],  cmap="Blues")
-    sns.heatmap(df_cm_train_rel, annot=True, ax=ax[1],  cmap="Blues")
+    sns.heatmap(df_cm_test_rel, annot=True, ax=ax[0],  cmap="Blues", cbar=False)
+    sns.heatmap(df_cm_train_rel, annot=True, ax=ax[1],  cmap="Blues", cbar=False)
     ax[0].set_title("Test Data")
     ax[1].set_title("Train Data")
 
