@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+import concurrent.futures
+import itertools
 
 def generate(filepath):
     """Generate the datasets"""
@@ -12,24 +14,32 @@ def generate(filepath):
 
     longes_run = np.max(run_length)
 
-    for number in range(longes_run):
+    for number in range(2,longes_run):
         #the first dataset is already generated
         if number in [0,1]:
             continue
         print("CREATING DATAFRAME NR:", number)
         generate_current_state(number, grouped_df, columns=columns)
+    # with concurrent.futures.ThreadPoolExecutor() as executor:
+    # # use map to apply generate_current_state function to each number in range
+    # # the executor will handle creating the threads
+    #     args = zip(range(0, longes_run), itertools.repeat(grouped_df), itertools.repeat(columns))
+    #     executor.map(generate_current_state, *args)
+    #     future_to_num = {executor.submit(generate_current_state, *args): number for number in range(2, longes_run)}
+
+    #     # use concurrent.futures.wait to wait for all threads to complete
+    #     concurrent.futures.wait(future_to_num)
 
 
 def generate_current_state(current_number, grouped_df, columns):
     """Generate the dataset for the current numbers of events, which where triggered."""
-    file_name = f"/Users/sophie/Documents/DSE/WS_22_23/PRM/pm-road-fines/data/{current_number}_data.csv"
+    file_name = fr"C:\Users\PhilippKastenhofer\repositories\pm-road-fines\data\new_data\{current_number}_data.csv"
     data = []
     # cols: ['amount', 'org:resource', 'dismissal', 'concept:name', 'vehicleClass',
     # 'totalPaymentAmount', 'lifecycle:transition', 'time:timestamp',
     # 'article', 'points', 'case:concept:name', 'expense', 'notificationType',
     # 'lastSent', 'paymentAmount', 'matricola']
     for idx, group in grouped_df:
-        print("group: ", idx)
         if current_number == 0:
             entry = group.iloc[current_number].values
             data.append(entry)
@@ -48,16 +58,16 @@ def generate_current_state(current_number, grouped_df, columns):
             value = list(group.iloc[row_idx].values)
             value.remove(key)
             current_df.loc[key] = value
-
-            pre_df = pre_df.combine_first(current_df)
+            pre_df = current_df.combine_first(pre_df)
 
         entry = pre_df.loc[key].values
         data.append(entry)
 
     new_df = pd.DataFrame(data)
+    print(file_name)
     new_df.to_csv(file_name)
 
 
 if __name__ == "__main__":
-    filepath = "/Users/sophie/Documents/DSE/WS_22_23/PRM/pm-road-fines/data/Road_Traffic_Fine_Management_Process_cleaned.csv"
+    filepath = r"C:\Users\PhilippKastenhofer\repositories\pm-road-fines\data\logs\log.csv"
     generate(filepath)

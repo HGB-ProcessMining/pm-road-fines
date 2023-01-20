@@ -3,14 +3,14 @@ import numpy as np
 
 def generate():
     """Generate the datasets"""
-    filepath = "/Users/sophie/Documents/DSE/WS_22_23/PRM/pm-road-fines/data/Road_Traffic_Fine_Management_Process_cleaned.csv"
+    filepath = r"C:\Users\PhilippKastenhofer\repositories\pm-road-fines\data\logs\log.csv"
     df = pd.read_csv(filepath, parse_dates=["time:timestamp"], index_col=0)
     concept_names = df['case:concept:name'].unique()
     columns = list(df.columns)
     columns.remove('case:concept:name')
 
-    filepath = "/Users/sophie/Documents/DSE/WS_22_23/PRM/pm-road-fines/data/"
-    for number in range(9):
+    filepath = "C:\\Users\\PhilippKastenhofer\\repositories\\pm-road-fines\\data\\new_data\\"
+    for number in range(2,9):
         if number == 0:
             continue
         data_path = filepath + str(number) + "_data.csv"
