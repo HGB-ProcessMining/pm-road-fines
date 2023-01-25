@@ -12,5 +12,5 @@ The first step is to explore the data and clean it as necessary. This includes h
 ## Dataset Creation
 The second step is to create datasets for each step in the traces. This includes creating a dataset for all first steps in traces, a dataset for all first and second steps, and so on. A total of 9 datasets were created for this project. You can see the Creation Process in the Picture below.
 
-![Creation Process](/Bild2.JPG)
-![Creation Process](/Bild3.JPG)
+![Creation Process](Bild2.JPG)
+![Creation Process](Bild3.JPG)
